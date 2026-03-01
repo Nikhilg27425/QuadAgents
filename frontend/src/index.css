@@ -1,0 +1,180 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+@layer base {
+  :root {
+    /* Krishi Sahaayak - Agricultural Green Design System */
+    --background: 60 9% 97%;
+    --foreground: 120 25% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 120 25% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 120 25% 12%;
+
+    /* Deep Agricultural Green */
+    --primary: 142 60% 28%;
+    --primary-foreground: 0 0% 98%;
+    --primary-light: 142 60% 95%;
+    --primary-glow: 142 60% 40%;
+
+    /* Warm Amber / Wheat */
+    --secondary: 38 80% 52%;
+    --secondary-foreground: 38 80% 10%;
+    --secondary-light: 38 80% 94%;
+
+    --muted: 120 10% 93%;
+    --muted-foreground: 120 10% 40%;
+
+    /* Earthy Accent */
+    --accent: 25 55% 35%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 120 15% 85%;
+    --input: 120 15% 85%;
+    --ring: 142 60% 28%;
+
+    --radius: 0.75rem;
+
+    /* Custom tokens */
+    --gradient-hero: linear-gradient(135deg, hsl(142 60% 22%), hsl(142 60% 35%), hsl(38 80% 45%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(120 10% 97%));
+    --gradient-primary-soft: linear-gradient(135deg, hsl(142 60% 95%), hsl(38 80% 94%));
+    --shadow-card: 0 2px 16px -4px hsl(142 60% 28% / 0.15);
+    --shadow-primary: 0 4px 24px -6px hsl(142 60% 28% / 0.4);
+
+    --sidebar-background: 142 30% 18%;
+    --sidebar-foreground: 0 0% 92%;
+    --sidebar-primary: 38 80% 52%;
+    --sidebar-primary-foreground: 38 80% 10%;
+    --sidebar-accent: 142 30% 25%;
+    --sidebar-accent-foreground: 0 0% 92%;
+    --sidebar-border: 142 30% 25%;
+    --sidebar-ring: 38 80% 52%;
+  }
+
+  .dark {
+    --background: 120 25% 8%;
+    --foreground: 60 9% 95%;
+    --card: 120 25% 11%;
+    --card-foreground: 60 9% 95%;
+    --popover: 120 25% 11%;
+    --popover-foreground: 60 9% 95%;
+    --primary: 142 60% 45%;
+    --primary-foreground: 120 25% 8%;
+    --secondary: 38 80% 45%;
+    --secondary-foreground: 38 80% 95%;
+    --muted: 120 15% 18%;
+    --muted-foreground: 120 10% 60%;
+    --accent: 25 55% 50%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62% 40%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 120 15% 22%;
+    --input: 120 15% 22%;
+    --ring: 142 60% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Mukta', 'Inter', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Mukta', sans-serif;
+    @apply font-bold;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:opacity-90 transition-all duration-200 rounded-xl px-6 py-3 font-semibold text-lg shadow-md active:scale-95;
+    box-shadow: var(--shadow-primary);
+  }
+
+  .card-krishi {
+    @apply bg-card rounded-2xl border border-border;
+    box-shadow: var(--shadow-card);
+  }
+
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  .chat-bubble-user {
+    @apply bg-primary text-primary-foreground rounded-2xl rounded-br-sm px-4 py-3 max-w-xs ml-auto;
+  }
+
+  .chat-bubble-bot {
+    @apply bg-card text-card-foreground rounded-2xl rounded-bl-sm px-4 py-3 max-w-xs border border-border;
+    box-shadow: var(--shadow-card);
+  }
+
+  .nav-item {
+    @apply flex flex-col items-center gap-1 px-3 py-2 rounded-xl text-muted-foreground transition-all duration-200;
+  }
+
+  .nav-item.active {
+    @apply text-primary bg-primary-light font-semibold;
+  }
+
+  .skeleton-pulse {
+    @apply bg-muted animate-pulse rounded-xl;
+  }
+
+  .recording-indicator {
+    @apply w-3 h-3 rounded-full bg-destructive animate-pulse;
+  }
+}
+
+@layer utilities {
+  .bg-primary-light {
+    background-color: hsl(var(--primary-light));
+  }
+
+  .bg-secondary-light {
+    background-color: hsl(var(--secondary-light));
+  }
+
+  .text-secondary {
+    color: hsl(var(--secondary));
+  }
+
+  .border-primary-light {
+    border-color: hsl(var(--primary-light));
+  }
+
+  .waveform-bar {
+    @apply w-1 rounded-full bg-primary origin-bottom;
+    animation: waveform 0.6s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes waveform {
+  from { transform: scaleY(0.3); }
+  to   { transform: scaleY(1); }
+}
+
+@keyframes typing-dot {
+  0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+.typing-dot {
+  animation: typing-dot 1.4s infinite ease-in-out;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
