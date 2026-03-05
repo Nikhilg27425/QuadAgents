@@ -1,7 +1,7 @@
 import React from "react";
 import { formatTime } from "@/utils/helpers";
-import { Message } from "@/context/ChatContext";
-import { Volume2, RefreshCw } from "lucide-react";
+import { Message } from "@/types/lambda";
+import { Volume2, RefreshCw, Info } from "lucide-react";
 
 interface Props {
   message: Message;
@@ -11,7 +11,14 @@ export default function MessageBubble({ message }: Props) {
   const isUser = message.sender === "user";
   const [playing, setPlaying] = React.useState(false);
   const [audioError, setAudioError] = React.useState(false);
+  const [showMetadata, setShowMetadata] = React.useState(false);
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
+  
+  // Debug logging
+  if (!isUser) {
+    console.log('Bot message:', message);
+    console.log('Has audioUrl:', !!message.audioUrl);
+  }
 
   const playAudio = () => {
     if (!message.audioUrl) return;
@@ -57,6 +64,40 @@ export default function MessageBubble({ message }: Props) {
                   <Volume2 size={14} />
                   {playing ? "चल रहा है..." : "सुनें"}
                 </button>
+              )}
+            </div>
+          )}
+
+          {/* Metadata toggle */}
+          {!isUser && message.metadata && (
+            <div className="mt-2">
+              <button
+                onClick={() => setShowMetadata(!showMetadata)}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Info size={12} />
+                {showMetadata ? "विवरण छुपाएं" : "विवरण देखें"}
+              </button>
+              
+              {showMetadata && (
+                <div className="mt-2 p-2 bg-muted/50 rounded-lg text-xs space-y-1">
+                  {message.metadata.language && (
+                    <div>
+                      <span className="font-semibold">भाषा:</span> {message.metadata.language}
+                    </div>
+                  )}
+                  {message.metadata.intent && (
+                    <div>
+                      <span className="font-semibold">इरादा:</span> {message.metadata.intent}
+                    </div>
+                  )}
+                  {message.metadata.similarityScore !== undefined && (
+                    <div>
+                      <span className="font-semibold">समानता स्कोर:</span>{" "}
+                      {(message.metadata.similarityScore * 100).toFixed(1)}%
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           )}

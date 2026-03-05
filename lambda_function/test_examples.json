@@ -1,0 +1,88 @@
+{
+  "test_cases": [
+    {
+      "name": "Valid question",
+      "description": "Test with a valid question",
+      "event": {
+        "body": "{\"question\": \"What is artificial intelligence?\"}"
+      },
+      "expected_status": 200,
+      "expected_fields": ["answer", "audio_base64"]
+    },
+    {
+      "name": "Missing body",
+      "description": "Test with missing request body",
+      "event": {},
+      "expected_status": 400,
+      "expected_error": "Request body is required"
+    },
+    {
+      "name": "Invalid JSON",
+      "description": "Test with malformed JSON",
+      "event": {
+        "body": "{invalid json}"
+      },
+      "expected_status": 400,
+      "expected_error": "Invalid JSON in request body"
+    },
+    {
+      "name": "Missing question field",
+      "description": "Test with missing question field",
+      "event": {
+        "body": "{\"other_field\": \"value\"}"
+      },
+      "expected_status": 400,
+      "expected_error": "Missing required field: question"
+    },
+    {
+      "name": "Empty question",
+      "description": "Test with empty question string",
+      "event": {
+        "body": "{\"question\": \"\"}"
+      },
+      "expected_status": 400,
+      "expected_error": "Question field cannot be empty"
+    },
+    {
+      "name": "Whitespace-only question",
+      "description": "Test with whitespace-only question",
+      "event": {
+        "body": "{\"question\": \"   \"}"
+      },
+      "expected_status": 400,
+      "expected_error": "Question field cannot be empty"
+    },
+    {
+      "name": "Long question",
+      "description": "Test with a longer question",
+      "event": {
+        "body": "{\"question\": \"Can you explain the difference between supervised and unsupervised machine learning, and provide examples of each?\"}"
+      },
+      "expected_status": 200,
+      "expected_fields": ["answer", "audio_base64"]
+    },
+    {
+      "name": "Question with special characters",
+      "description": "Test with special characters in question",
+      "event": {
+        "body": "{\"question\": \"What's the difference between AI & ML?\"}"
+      },
+      "expected_status": 200,
+      "expected_fields": ["answer", "audio_base64"]
+    },
+    {
+      "name": "Question with Unicode",
+      "description": "Test with Hindi Unicode characters",
+      "event": {
+        "body": "{\"question\": \"कृत्रिम बुद्धिमत्ता क्या है?\"}"
+      },
+      "expected_status": 200,
+      "expected_fields": ["answer", "audio_base64"]
+    }
+  ],
+  "usage_instructions": {
+    "cli_test": "aws lambda invoke --function-name rag-polly-tts --payload file://test_event.json response.json",
+    "create_test_event": "Extract the 'event' field from any test case above and save it as test_event.json",
+    "example": "echo '{\"body\": \"{\\\"question\\\": \\\"Test\\\"}\"}' > test_event.json"
+  }
+}

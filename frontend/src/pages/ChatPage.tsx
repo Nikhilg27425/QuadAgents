@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Send, Wifi, WifiOff, Mic, Keyboard } from "lucide-react";
-import { useChat, Message } from "@/context/ChatContext";
+import { useChat } from "@/context/ChatContext";
 import { useUser } from "@/context/UserContext";
-import apiClient from "@/api/apiClient";
+import { Message } from "@/types/lambda";
+import { askLambda } from "@/api/lambda";
 import MessageBubble from "@/components/Chat/MessageBubble";
-import VoiceRecorder from "@/components/Chat/VoiceRecorder";
 import { generateId, getErrorMessage } from "@/utils/helpers";
 
 function TypingIndicator() {
@@ -28,55 +28,117 @@ export default function ChatPage() {
   const [inputText, setInputText] = useState("");
   const [error, setError] = useState("");
   const [voiceMode, setVoiceMode] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [transcript, setTranscript] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
+
+  // Initialize Web Speech API
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = true;
+      recognitionRef.current.lang = 'hi-IN'; // Hindi language
+
+      recognitionRef.current.onresult = (event: any) => {
+        const current = event.resultIndex;
+        const transcriptText = event.results[current][0].transcript;
+        setTranscript(transcriptText);
+        
+        // If final result, send to Lambda
+        if (event.results[current].isFinal) {
+          setIsListening(false);
+          sendTextMessage(transcriptText);
+        }
+      };
+
+      recognitionRef.current.onerror = (event: any) => {
+        console.error('Speech recognition error:', event.error);
+        setIsListening(false);
+        setError('वॉयस पहचान में त्रुटि। कृपया दोबारा कोशिश करें।');
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  const sendTextMessage = async () => {
-    const text = inputText.trim();
-    if (!text || loading) return;
+  const sendTextMessage = async (text?: string) => {
+    const messageText = text || inputText.trim();
+    if (!messageText || loading) return;
+    
     setInputText("");
+    setTranscript("");
     setError("");
 
-    const userMsg: Message = { id: generateId(), sender: "user", text, timestamp: Date.now() };
+    const userMsg: Message = { 
+      id: generateId(), 
+      sender: "user", 
+      text: messageText, 
+      timestamp: Date.now() 
+    };
     addMessage(userMsg);
     setLoading(true);
 
     try {
-      const res = await apiClient.post("/chat", {
-        message: text,
-        session_id: sessionId,
-        low_bandwidth: lowBandwidthMode,
-      });
-      const { text: botText, audio_url, follow_up_required } = res.data;
+      // Call Lambda API with session ID
+      const response = await askLambda(messageText, sessionId);
+      
+      // Handle different response types
+      let botText = "";
+      // Audio is available for any response type where Lambda returns audio_base64 or audio_url
+      const audioUrl = response.audio_base64 || response.audio_url;
+      let metadata = undefined;
+      
+      console.log('Lambda response:', response);
+      console.log('Audio URL:', audioUrl);
+      
+      if (response.onboarding) {
+        // Onboarding question
+        botText = response.question || "कृपया जवाब दें।";
+      } else if (response.onboarding_completed) {
+        // Onboarding completed
+        botText = response.message || "धन्यवाद! अब मैं आपकी मदद कर सकता हूं।";
+      } else {
+        // Regular RAG response with extra metadata
+        botText = response.answer || "माफ़ कीजिए, मुझे समझ नहीं आया।";
+        metadata = {
+          language: response.detected_language,
+          intent: response.intent,
+          similarityScore: response.similarity_score,
+          farmerProfile: response.farmer_profile,
+        };
+      }
+      
       const botMsg: Message = {
         id: generateId(),
         sender: "bot",
-        text: botText || "माफ़ कीजिए, मुझे समझ नहीं आया।",
+        text: botText,
         timestamp: Date.now(),
-        audioUrl: audio_url,
+        audioUrl: audioUrl,
+        metadata: metadata,
       };
       addMessage(botMsg);
-
-      if (follow_up_required) {
-        setTimeout(() => {
-          addMessage({
-            id: generateId(),
-            sender: "bot",
-            text: "क्या आप और जानकारी चाहते हैं?",
-            timestamp: Date.now(),
-          });
-        }, 800);
-      }
     } catch (err) {
       setError(getErrorMessage(err));
-      // Add mock response for demo
+      // Add error response
       addMessage({
         id: generateId(),
         sender: "bot",
-        text: "माफ़ करें, अभी सर्वर से जुड़ नहीं पा रहे। कृपया दोबारा कोशिश करें। (Demo मोड में: API कनेक्शन उपलब्ध नहीं)",
+        text: "माफ़ करें, अभी सर्वर से जुड़ नहीं पा रहे। कृपया दोबारा कोशिश करें।",
         timestamp: Date.now(),
       });
     } finally {
@@ -84,44 +146,27 @@ export default function ChatPage() {
     }
   };
 
-  const handleVoiceComplete = async (blob: Blob) => {
-    setError("");
-    const userMsg: Message = {
-      id: generateId(),
-      sender: "user",
-      text: "🎙️ वॉयस संदेश भेजा",
-      timestamp: Date.now(),
-    };
-    addMessage(userMsg);
-    setLoading(true);
+  const startVoiceRecognition = () => {
+    if (!recognitionRef.current) {
+      setError('आपका ब्राउज़र वॉयस पहचान का समर्थन नहीं करता।');
+      return;
+    }
 
     try {
-      const formData = new FormData();
-      formData.append("audio", blob, "recording.webm");
-      formData.append("session_id", sessionId);
-      formData.append("low_bandwidth", String(lowBandwidthMode));
-
-      const res = await apiClient.post("/voice-chat", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      const { text: botText, audio_url } = res.data;
-      addMessage({
-        id: generateId(),
-        sender: "bot",
-        text: botText || "आपकी आवाज़ सुन ली।",
-        timestamp: Date.now(),
-        audioUrl: audio_url,
-      });
+      setTranscript("");
+      setError("");
+      recognitionRef.current.start();
+      setIsListening(true);
     } catch (err) {
-      setError(getErrorMessage(err));
-      addMessage({
-        id: generateId(),
-        sender: "bot",
-        text: "वॉयस प्रोसेस नहीं हो सका। कृपया टेक्स्ट में लिखें।",
-        timestamp: Date.now(),
-      });
-    } finally {
-      setLoading(false);
+      console.error('Error starting recognition:', err);
+      setError('वॉयस पहचान शुरू नहीं हो सका।');
+    }
+  };
+
+  const stopVoiceRecognition = () => {
+    if (recognitionRef.current && isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
     }
   };
 
@@ -191,12 +236,33 @@ export default function ChatPage() {
         </div>
 
         {voiceMode ? (
-          /* Voice input mode */
-          <div className="flex items-center justify-center bg-primary-light rounded-2xl px-4 py-4 gap-4">
-            <p className="text-sm text-primary font-medium flex-1 text-center">
-              {loading ? "जवाब तैयार हो रहा है..." : "माइक बटन दबाकर बोलें"}
-            </p>
-            <VoiceRecorder onRecordingComplete={handleVoiceComplete} disabled={loading} />
+          /* Voice input mode with Web Speech API */
+          <div className="flex flex-col gap-2">
+            {isListening && transcript && (
+              <div className="bg-primary-light rounded-xl px-4 py-2">
+                <p className="text-sm text-primary">{transcript}</p>
+              </div>
+            )}
+            <div className="flex items-center justify-center bg-primary-light rounded-2xl px-4 py-4 gap-4">
+              <p className="text-sm text-primary font-medium flex-1 text-center">
+                {loading 
+                  ? "जवाब तैयार हो रहा है..." 
+                  : isListening 
+                  ? "सुन रहे हैं... बोलें" 
+                  : "माइक बटन दबाकर बोलें"}
+              </p>
+              <button
+                onClick={isListening ? stopVoiceRecognition : startVoiceRecognition}
+                disabled={loading}
+                className={`w-11 h-11 rounded-xl flex items-center justify-center transition-colors disabled:opacity-40 ${
+                  isListening 
+                    ? "bg-destructive text-primary-foreground animate-pulse" 
+                    : "bg-primary text-primary-foreground hover:opacity-80"
+                }`}
+              >
+                <Mic size={20} />
+              </button>
+            </div>
           </div>
         ) : (
           /* Text input mode */
