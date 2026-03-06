@@ -24,6 +24,20 @@ export default function LoginPage() {
       setError("कृपया सही नाम डालें।");
       return;
     }
+    
+    // Phone validation: 10 digits, numbers only
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(phone)) {
+      setError("मोबाइल नंबर 10 अंकों का होना चाहिए।");
+      return;
+    }
+    
+    // Password validation: minimum 5 characters
+    if (password.length < 5) {
+      setError("पासवर्ड कम से कम 5 अक्षरों का होना चाहिए।");
+      return;
+    }
+    
     setLoading(true);
     setError("");
     try {
@@ -87,8 +101,13 @@ export default function LoginPage() {
               <input
                 type="tel"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => {
+                  // Only allow numbers
+                  const value = e.target.value.replace(/[^0-9]/g, '');
+                  setPhone(value);
+                }}
                 placeholder="9876543210"
+                maxLength={10}
                 className="w-full pl-12 pr-4 py-4 rounded-xl border border-border bg-card text-foreground text-lg focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
