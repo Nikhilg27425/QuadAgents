@@ -178,7 +178,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen pt-16 pb-20 bg-background">
+    <div className="flex flex-col h-screen pt-16 bg-background">
       {/* Low bandwidth toggle */}
       <div className="px-4 py-2 bg-card border-b border-border flex items-center justify-between">
         <span className="text-sm text-muted-foreground font-medium">
@@ -198,7 +198,7 @@ export default function ChatPage() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
+      <div className="flex-1 overflow-y-auto px-4 py-4 pb-48 space-y-1">
         {messages.map((msg) => (
           <MessageBubble key={msg.id} message={msg} />
         ))}
