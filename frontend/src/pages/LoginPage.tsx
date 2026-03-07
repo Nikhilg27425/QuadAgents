@@ -6,7 +6,7 @@ export default function LoginPage() {
   window.location.href =
     "https://ap-south-1tu27dcuk2.auth.ap-south-1.amazoncognito.com/login" +
     "?client_id=dlad803ahh5qm997f9mo9vi7d" +
-    "&response_type=token" +
+    "&response_type=code" +
     "&scope=openid+email+phone" +
     "&redirect_uri=https://quad-agents.vercel.app";
 };
