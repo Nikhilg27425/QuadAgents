@@ -10,7 +10,7 @@ const apiClient: AxiosInstance = axios.create({
 
 // Attach JWT token from sessionStorage
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const token = sessionStorage.getItem("ks_token");
+  const token = localStorage.getItem("token");
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -22,10 +22,9 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      sessionStorage.removeItem("ks_token");
-      sessionStorage.removeItem("ks_user");
+      localStorage.removeItem("token");
       window.location.href = "/login";
-    }
+  }
     return Promise.reject(error);
   }
 );
