@@ -231,10 +231,14 @@ This project is licensed under the MIT License.
 ## 👥 Authors
 
 - Nikhil Gupta - [@Nikhilg27425](https://github.com/Nikhilg27425)
+- Vanshika Thadani - [@vanshika-thadani](https://github.com/vanshika-thadani)
+- Prachi Nainwani - [@PrachiNainwani31](https://github.com/PrachiNainwani31)
+- Prachi Saxena - [@prachis2312](https://github.com/prachis2312)
 
 ## 🙏 Acknowledgments
 
 - Built with AWS services for scalability and reliability
+- Used Kiro for various development and integration purposes
 - UI components from shadcn/ui
 - Icons from Lucide React
 - Designed for Indian farmers with accessibility in mind
