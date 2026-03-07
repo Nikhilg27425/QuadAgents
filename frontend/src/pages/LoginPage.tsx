@@ -8,7 +8,7 @@ export default function LoginPage() {
       "?client_id=dlad803ahh5qm997f9mo9vi7d" +
       "&response_type=token" +
       "&scope=openid+email" +
-      "&redirect_uri=hhtps://d2cenfqtilq1ns.cloudfront.net";
+      "&redirect_uri=hhtps://d2cenfqtilq1ns.cloudfront.net/";
   };
 
   return (
