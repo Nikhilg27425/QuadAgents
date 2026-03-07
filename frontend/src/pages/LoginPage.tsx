@@ -3,13 +3,13 @@ import { Leaf } from "lucide-react";
 export default function LoginPage() {
 
   const login = () => {
-    window.location.href =
-      "https://ap-south-1tu27dcuk2.auth.ap-south-1.amazoncognito.com/login" +
-      "?client_id=dlad803ahh5qm997f9mo9vi7d" +
-      "&response_type=token" +
-      "&scope=openid+email" +
-      "&redirect_uri=hhtps://d2cenfqtilq1ns.cloudfront.net/";
-  };
+  window.location.href =
+    "https://ap-south-1tu27dcuk2.auth.ap-south-1.amazoncognito.com/login" +
+    "?client_id=dlad803ahh5qm997f9mo9vi7d" +
+    "&response_type=code" +
+    "&scope=openid+email+phone" +
+    "&redirect_uri=https://d31djjq6ss6yla.cloudfront.net/";
+};
 
   return (
     <div className="min-h-screen flex flex-col gradient-hero">
