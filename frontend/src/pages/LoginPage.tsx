@@ -8,7 +8,7 @@ export default function LoginPage() {
     "?client_id=dlad803ahh5qm997f9mo9vi7d" +
     "&response_type=code" +
     "&scope=openid+email+phone" +
-    "&redirect_uri=https://d2cenfqtilq1ns.cloudfront.net/";
+    "&redirect_uri=https://quad-agents.vercel.app/";
 };
 
   return (
