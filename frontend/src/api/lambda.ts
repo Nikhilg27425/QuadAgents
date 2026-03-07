@@ -55,7 +55,34 @@ export async function askLambda(question: string, sessionId?: string): Promise<L
       session_id: sessionId 
     };
     
-    const response = await lambdaClient.post("", request);
+    // Get the JWT token from localStorage for Cognito authorization
+    const token = localStorage.getItem("token");
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    
+    if (token) {
+      // Check if token is expired
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const expirationTime = payload.exp * 1000; // Convert to milliseconds
+        
+        if (Date.now() >= expirationTime) {
+          console.log("🔴 Token has expired, redirecting to login");
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+          throw new Error("Token has expired. Please log in again.");
+        }
+      } catch (error) {
+        console.error("Error checking token expiration:", error);
+      }
+      
+      headers["Authorization"] = `Bearer ${token}`;
+    } else {
+      throw new Error("No authentication token found. Please log in.");
+    }
+    
+    const response = await lambdaClient.post("", request, { headers });
     
     // API Gateway with payload format 2.0 returns the body directly
     // Check if response has the expected fields
