@@ -41,9 +41,9 @@ const App = () => {
           <TooltipProvider>
             <Toaster />
             <Sonner />
-
             <BrowserRouter>
               <Routes>
+
                 <Route path="/login" element={<LoginPage />} />
 
                 <Route
@@ -62,9 +62,9 @@ const App = () => {
                 </Route>
 
                 <Route path="*" element={<NotFound />} />
+
               </Routes>
             </BrowserRouter>
-
           </TooltipProvider>
         </ChatProvider>
       </UserProvider>
