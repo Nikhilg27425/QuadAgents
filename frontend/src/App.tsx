@@ -18,19 +18,41 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const App = () => {
+  // Extract tokens IMMEDIATELY before any routing happens
+  const hash = window.location.hash;
+  
+  if (hash.includes("id_token") || hash.includes("access_token")) {
+    console.log("✅ Found tokens in URL hash, extracting...");
+    const params = new URLSearchParams(hash.substring(1));
+    const idToken = params.get("id_token");
+    const accessToken = params.get("access_token");
+    
+    const token = idToken || accessToken;
+    if (token) {
+      console.log("💾 Saving token to localStorage");
+      localStorage.setItem("token", token);
+      // Clean URL and redirect to dashboard
+      window.history.replaceState({}, document.title, "/dashboard");
+    }
+  }
 
   useEffect(() => {
     const hash = window.location.hash;
+    const search = window.location.search;
+    
+    console.log("🔍 App.tsx - Current URL:", window.location.href);
+    console.log("🔍 Hash:", hash);
+    console.log("🔍 Search params:", search);
+    console.log("🔍 Current token in localStorage:", localStorage.getItem("token"));
 
-    if (hash.includes("id_token")) {
-      const params = new URLSearchParams(hash.substring(1));
-      const token = params.get("id_token");
-
-      if (token) {
-        localStorage.setItem("token", token);
-        window.location.hash = "";
-        window.location.replace("/dashboard");
-      }
+    if (search.includes("code=")) {
+      // Authorization code flow - not supported yet
+      console.log("⚠️ Found authorization code in URL - this flow is not implemented");
+      const params = new URLSearchParams(search);
+      const code = params.get("code");
+      console.log("📝 Authorization code:", code?.substring(0, 20) + "...");
+    } else if (!hash.includes("id_token") && !hash.includes("access_token")) {
+      console.log("ℹ️ No tokens found in URL");
     }
   }, []);
 
