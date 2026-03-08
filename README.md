@@ -4,7 +4,7 @@
 
 ## 🚀 Live Demo
 
-**Deployed Application:** [https://quad-agents.vercel.app](https://quad-agents.vercel.app)
+**Deployed Application:** [https://d1k7y0uoc8v1bk.cloudfront.net/](https://d1k7y0uoc8v1bk.cloudfront.net/)
 
 ## 📋 Overview
 
@@ -118,7 +118,7 @@ User → Frontend (React) → API Gateway (Cognito Auth) → Lambda Function
 ### For New Users
 
 1. **Access the Application**
-   - Visit [https://quad-agents.vercel.app](https://quad-agents.vercel.app)
+   - Visit [https://d1k7y0uoc8v1bk.cloudfront.net/](https://d1k7y0uoc8v1bk.cloudfront.net/)
    - Click "लॉगिन करें" (Login) button
 
 2. **Sign Up / Login**
